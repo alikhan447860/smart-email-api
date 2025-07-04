@@ -1,13 +1,14 @@
-# Use Maven image to build the app
-FROM maven:3.9.6-eclipse-temurin-17 as build
-WORKDIR /app
-COPY . .
-RUN mvn clean package -DskipTests
+# Use Java 21 image
+FROM eclipse-temurin:21-jdk-alpine
 
-# Use lightweight JRE image to run the app
-FROM eclipse-temurin:17-jre
+# Create directory in container
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
 
+# Copy jar from host to container
+COPY target/email-writer-sb-0.0.1-SNAPSHOT.jar app.jar
+
+# Expose the port
 EXPOSE 8080
+
+# Run jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
