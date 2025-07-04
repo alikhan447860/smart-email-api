@@ -24,10 +24,8 @@ public class EmailGeneratorService {
     }
 
     public String generateEmailReply(EmailRequest emailRequest) {
-        // Build the prompt
         String prompt = buildPrompt(emailRequest);
 
-        // Craft a request
         Map<String, Object> requestBody = Map.of(
                 "contents", new Object[] {
                         Map.of("parts", new Object[]{
@@ -36,16 +34,15 @@ public class EmailGeneratorService {
                 }
         );
 
-        // Do request and get response
         String response = webClient.post()
-                .uri(geminiApiUrl + geminiApiKey)
-                .header("Content-Type","application/json")
+                .uri("https://generativelanguage.googleapis.com" + geminiApiUrl)
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + geminiApiKey)
                 .bodyValue(requestBody)
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
 
-        // Extract Response and Return
         return extractResponseContent(response);
     }
 
@@ -61,7 +58,7 @@ public class EmailGeneratorService {
                     .path("text")
                     .asText();
         } catch (Exception e) {
-            return "Error processing request: " + e.getMessage();
+            return "Error processing response: " + e.getMessage();
         }
     }
 
@@ -69,9 +66,9 @@ public class EmailGeneratorService {
         StringBuilder prompt = new StringBuilder();
         prompt.append("Generate a professional email reply for the following email content.");
         if (emailRequest.getTone() != null && !emailRequest.getTone().isEmpty()) {
-            prompt.append("Use a ").append(emailRequest.getTone()).append(" tone.");
+            prompt.append(" Use a ").append(emailRequest.getTone()).append(" tone.");
         }
-        prompt.append("\nOriginal email: \n").append(emailRequest.getEmailContent());
+        prompt.append("\nOriginal email:\n").append(emailRequest.getEmailContent());
         return prompt.toString();
     }
 }
